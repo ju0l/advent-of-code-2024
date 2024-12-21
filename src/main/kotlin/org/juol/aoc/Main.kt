@@ -1,9 +1,15 @@
 package org.juol.aoc
 
-fun main() {
-    fun part1(input: List<String>): Int = input.size
+import org.juol.aoc.utils.*
 
-    fun part2(input: List<String>): Int = input.size
+fun part1(input: String): Int = 0
+
+fun part2(input: String): Int = 0
+
+fun main() {
+    val testInput =
+        """
+        """.trimIndent()
 
     val testAnswer1 = 0
     check(part1(testInput) == testAnswer1) { "answer 1 to test is wrong" }
@@ -14,7 +20,3 @@ fun main() {
     part1(input).println()
     part2(input).println()
 }
-
-val testInput =
-    """
-""".lines()
