@@ -2,9 +2,9 @@ package org.juol.aoc
 
 import org.juol.aoc.utils.*
 
-fun part1(input: String): Int = 0
+private fun part1(input: String): Int = 0
 
-fun part2(input: String): Int = 0
+private fun part2(input: String): Int = 0
 
 fun main() {
     val testInput =
