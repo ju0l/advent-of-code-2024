@@ -82,5 +82,6 @@ fun main() {
     check(part1(testInput) == testAnswer1) { "answer 1 to test is wrong" }
 
     val input = readInput("Day25")
+    // 3320
     part1(input).println()
 }
