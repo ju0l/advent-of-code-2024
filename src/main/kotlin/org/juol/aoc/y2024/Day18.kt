@@ -17,8 +17,8 @@ private fun part1(
         .take(bytesCount)
         .forEach { p -> grid[p] = "#" }
 
-    val s = grid.shortestPath(0 to 0, gridSize - 1 to gridSize - 1)
-    return s
+    val dst = grid.shortestDst(0 to 0, gridSize - 1 to gridSize - 1, "#")
+    return dst
 }
 
 private fun part2(
@@ -31,7 +31,7 @@ private fun part2(
 
     for (b in bytes) {
         grid[b] = "#"
-        val s = grid.shortestPath(0 to 0, gridSize - 1 to gridSize - 1)
+        val s = grid.shortestDst(0 to 0, gridSize - 1 to gridSize - 1, "#")
         if (s == Int.MAX_VALUE) {
             return "${b.x},${b.y}"
         }

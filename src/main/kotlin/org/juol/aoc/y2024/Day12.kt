@@ -45,6 +45,7 @@ private fun Point.getFences(matrix: Grid<String>): List<Fence> =
         .all()
         .map { Fence(this + it.dx, it) }
         .filter { (p) -> matrix.getOrNull(p) != matrix[this] }
+        .toList()
 
 private fun Set<Point>.getFences(matrix: Grid<String>): List<Fence> = this.map { it.getFences(matrix) }.flatten()
 

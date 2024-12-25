@@ -47,6 +47,7 @@ val Point.y: Int
 enum class Orientation {
     VERTICAL,
     HORIZONTAL,
+    NONE,
 }
 
 enum class Direction(
@@ -57,11 +58,10 @@ enum class Direction(
     RIGHT(1 to 0, Orientation.HORIZONTAL),
     DOWN(0 to 1, Orientation.VERTICAL),
     LEFT(-1 to 0, Orientation.HORIZONTAL),
+    NONE(0 to 0, Orientation.NONE),
     ;
 
     companion object {
-        fun all() = listOf(UP, RIGHT, DOWN, LEFT)
+        fun all() = sequenceOf(UP, RIGHT, DOWN, LEFT)
     }
 }
-
-typealias Vector = Pair<Point, Direction>

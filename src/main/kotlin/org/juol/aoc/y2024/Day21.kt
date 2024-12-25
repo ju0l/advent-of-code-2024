@@ -48,26 +48,7 @@ private fun charCommands(
     keypad: Grid<String>,
     start: Point,
     end: Point,
-): Set<Path> {
-    // TODO rewrite dijkstra to ignore direction
-    val tmp = mutableListOf<Pair<Int, List<Path>>>()
-    Direction
-        .all()
-        .forEach {
-            try {
-                val p = keypad.findMinPaths(start, end, "#", it)
-                tmp.add(p)
-            } catch (_: Exception) {
-            }
-        }
-    return tmp
-        .groupBy { it.first }
-        .minBy { it.key }
-        .value
-        .map { it.second }
-        .flatten()
-        .toSet()
-}
+): List<GridPath> = keypad.findMinPaths(start, end, "#")
 
 private fun buildKeypadPaths(keypad: Grid<String>): Map<Pair<String, String>, List<String>> {
     val pos =
@@ -83,10 +64,7 @@ private fun buildKeypadPaths(keypad: Grid<String>): Map<Pair<String, String>, Li
             if (key1 != "#" && key2 != "#" && key1 != key2) {
                 val paths =
                     charCommands(keypad, pos[key1]!!, pos[key2]!!)
-                        .groupBy { it.size }
-                        .minBy { it.key }
-                        .value
-                        .map { p -> p.zipWithNext { a, b -> movement(a, b) }.joinToString("") + "A" }
+                        .map { p -> p.path.zipWithNext { a, b -> movement(a.p, b.p) }.joinToString("") + "A" }
                 moves
                     .getOrPut(Pair(key1, key2)) { mutableListOf() }
                     .addAll(paths)
@@ -171,6 +149,8 @@ fun main() {
 //    check(part2(testInput) == testAnswer2) { "answer 2 to test is wrong" }
 
     val input = readInput("Day21")
+    // 136780
     part1(input).println()
+    // 167538833832712
     part2(input).println()
 }

@@ -6,6 +6,7 @@ import java.io.FileWriter
 class Grid<T>(
     private val list: MutableList<MutableList<T>>,
     private val separator: String = "",
+    private val formatter: (T) -> String = { it.toString() },
 ) {
     val width: Int
         get() = list.getOrNull(0)?.size ?: 0
@@ -63,10 +64,10 @@ class Grid<T>(
         return null
     }
 
-    fun findIndex(predicate: (T) -> Boolean): Point? {
+    fun findIndex(predicate: (Point, T) -> Boolean): Point? {
         for (y in list.indices) {
             for (x in list[y].indices) {
-                if (predicate(list[y][x])) {
+                if (predicate(Point(x, y), list[y][x])) {
                     return Point(x, y)
                 }
             }
@@ -118,7 +119,7 @@ class Grid<T>(
     fun forEach(action: (Point, T) -> Unit) {
         for (y in list.indices) {
             for (x in list[y].indices) {
-                action(x to y, list[y][x])
+                action(Point(x, y), list[y][x])
             }
         }
     }
@@ -129,7 +130,7 @@ class Grid<T>(
                 .mapIndexed { y, row ->
                     row
                         .mapIndexed { x, value ->
-                            transform(x to y, value)
+                            transform(Point(x, y), value)
                         }.toMutableList()
                 }.toMutableList()
         return Grid(newList)
@@ -155,11 +156,11 @@ class Grid<T>(
 
     fun print(
         separator: String = this.separator,
+        formatter: (T) -> String = this.formatter,
         fileWriter: FileWriter? = null,
-        format: (T) -> String = { it.toString() },
     ) {
         for (row in rows()) {
-            val out = row.joinToString(separator) { format(it) }
+            val out = row.joinToString(separator) { formatter(it) }
             if (fileWriter != null) {
                 fileWriter.append(out)
                 fileWriter.append("\n")
@@ -171,9 +172,10 @@ class Grid<T>(
 
     fun printToImage(
         image: File,
-        format: (T) -> String = { it.toString() },
+        separator: String = this.separator,
+        formatter: (T) -> String = this.formatter,
     ) {
-        val out = rows().map { row -> row.joinToString(separator) { format(it) } }.joinToString("\n")
+        val out = rows().joinToString("\n") { row -> row.joinToString(separator) { formatter(it) } }
         printText(out, image)
     }
 }
@@ -184,23 +186,24 @@ fun String.toStringGrid(separator: String = ""): Grid<String> {
             .map { row ->
                 row
                     .split(separator)
-                    .filter { it.isNotEmpty() }
+                    .filter { it.isNotBlank() }
                     .toMutableList()
             }.toMutableList()
     return Grid(list, separator)
 }
 
 fun String.toIntGrid(separator: String = " "): Grid<Int> {
+    var max = 0
     val list =
         lines()
             .map { row ->
                 row
                     .split(separator)
-                    .filter { it.isNotEmpty() }
-                    .map { it.toInt() }
+                    .filter { it.isNotBlank() }
+                    .map { it.toInt().also { max = it.coerceAtLeast(max) } }
                     .toMutableList()
             }.toMutableList()
-    return Grid(list, separator)
+    return Grid(list, separator, intFormatter(max.toString().length))
 }
 
 fun filledGrid(
@@ -219,95 +222,13 @@ fun filledGrid(
     width: Int,
     height: Int,
     value: Int,
+    formatDigits: Int = value.toString().length,
 ): Grid<Int> {
     val list =
         MutableList(height) {
             MutableList(width) { value }
         }
-    return Grid(list, " ")
+    return Grid(list, " ", intFormatter(formatDigits))
 }
 
-// DIJKSTRA'S ALGORITHM
-typealias Path = List<Point>
-
-data class QueueItem(
-    val p: Point,
-    val dst: Int,
-    val dir: Direction,
-    val currentPath: Path,
-)
-
-fun <T> Grid<T>.findPaths(
-    start: Point,
-    end: Point,
-    wall: T,
-    startDirection: Direction = Direction.UP,
-    createDst: (currentPos: Point, currentDst: Int, currentDir: Direction, toDir: Direction) -> Int = { _, dst, _, _ -> dst + 1 },
-): Map<Int, List<Path>> {
-    val queue = ArrayDeque<QueueItem>().also { it.add(QueueItem(start, 0, startDirection, listOf(start))) }
-    val paths = mutableListOf<Pair<Path, Int>>()
-    val visited = mutableMapOf<Vector, Int>()
-
-    while (queue.isNotEmpty()) {
-        val (currentPos, currentDst, currentDir, currentPath) = queue.removeFirst()
-
-        if (currentPos == end) {
-            paths.add(currentPath to currentDst)
-            continue
-        }
-        val currentVector = currentPos to currentDir
-        if (visited.getOrDefault(currentVector, Int.MAX_VALUE) < currentDst) {
-            continue
-        }
-        visited[currentVector] = currentDst
-
-        for (dir in Direction.all()) {
-            val np = currentPos + dir.dx
-            if (!(dir.orientation == currentDir.orientation && dir != currentDir) &&
-                np in this &&
-                this[np] != wall &&
-                np !in currentPath
-            ) {
-                val newDst = createDst(currentPos, currentDst, currentDir, dir)
-                queue.add(QueueItem(np, newDst, dir, currentPath + np))
-            }
-        }
-    }
-
-    return paths.groupBy { it.second }.mapValues { it.value.map { p -> p.first } }
-}
-
-fun <T> Grid<T>.findMinPaths(
-    start: Point,
-    end: Point,
-    wall: T,
-    startDirection: Direction = Direction.UP,
-    createDst: (currentPos: Point, currentDst: Int, currentDir: Direction, toDir: Direction) -> Int = { _, dst, _, _ -> dst + 1 },
-): Pair<Int, List<Path>> = findPaths(start, end, wall, startDirection, createDst).minBy { it.key }.toPair()
-
-fun Grid<String>.shortestPath(
-    start: Point,
-    end: Point,
-    wall: String = "#",
-): Int {
-    val distances = filledGrid(width, height, Int.MAX_VALUE)
-
-    val queue = ArrayDeque<Pair<Point, Int>>()
-    queue.add(start to 0)
-    distances[start] = 0
-
-    while (queue.isNotEmpty()) {
-        val (currentNode, currentDst) = queue.removeFirst()
-        Direction.all().map { currentNode + it.dx }.forEach { p ->
-            if (p in this &&
-                this[p] != wall &&
-                currentDst + 1 < distances[p]
-            ) {
-                distances[p] = currentDst + 1
-                queue.add(p to currentDst + 1)
-            }
-        }
-    }
-
-    return distances[end]
-}
+fun intFormatter(decimals: Int): (Int) -> String = { it.toString().padStart(decimals, ' ') }

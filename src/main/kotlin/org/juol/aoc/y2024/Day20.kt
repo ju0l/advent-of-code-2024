@@ -4,13 +4,13 @@ import org.juol.aoc.utils.*
 import kotlin.math.abs
 
 private fun findCheats(
-    path: List<Point>,
+    path: List<PathStep>,
     minSavedSteps: Int,
     cheatMoves: Int,
 ): Int {
     val pathDistances = mutableMapOf<Point, Int>()
     path.forEachIndexed { i, p ->
-        pathDistances[p] = i
+        pathDistances[p.p] = i
     }
 
     val vectors = mutableListOf<Pair<Point, Int>>()
@@ -26,9 +26,9 @@ private fun findCheats(
     var cheats = 0
     for (p in path) {
         for ((d, dst) in vectors) {
-            val np = p + d
+            val np = p.p + d
             if (pathDistances.containsKey(np) &&
-                minSavedSteps <= (pathDistances[np]!! - pathDistances[p]!! - dst)
+                minSavedSteps <= (pathDistances[np]!! - pathDistances[p.p]!! - dst)
             ) {
                 cheats += 1
             }
@@ -37,16 +37,23 @@ private fun findCheats(
     return cheats
 }
 
-private fun part1(
+private fun process(
     input: String,
     minSavedSteps: Int,
+    cheatMoves: Int,
 ): Int {
     val grid = input.toStringGrid()
     val start = grid.indexOf("S") ?: error("No start found")
     val end = grid.indexOf("E") ?: error("No end found")
-    val (_, path) = grid.findMinPaths(start, end, "#", Direction.UP)
+    val paths = grid.findMinPaths(start, end, "#")
+    return findCheats(paths.first().path, minSavedSteps, cheatMoves)
+}
 
-    val sum = findCheats(path.first(), minSavedSteps, 2)
+private fun part1(
+    input: String,
+    minSavedSteps: Int,
+): Int {
+    val sum = process(input, minSavedSteps, 2)
     return sum
 }
 
@@ -54,12 +61,7 @@ private fun part2(
     input: String,
     minSavedSteps: Int,
 ): Int {
-    val grid = input.toStringGrid()
-    val start = grid.indexOf("S") ?: error("No start found")
-    val end = grid.indexOf("E") ?: error("No end found")
-    val (_, path) = grid.findMinPaths(start, end, "#", Direction.UP)
-
-    val sum = findCheats(path.first(), minSavedSteps, 20)
+    val sum = process(input, minSavedSteps, 20)
     return sum
 }
 
@@ -89,6 +91,8 @@ fun main() {
     check(part2(testInput, 76) == testAnswer2) { "answer 2 to test is wrong" }
 
     val input = readInput("Day20")
+    // 1372
     part1(input, 100).println()
+    // 979014
     part2(input, 100).println()
 }

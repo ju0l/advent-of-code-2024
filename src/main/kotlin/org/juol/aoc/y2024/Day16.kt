@@ -16,22 +16,23 @@ private fun findMinPaths(
     grid: Grid<String>,
     start: Point,
     end: Point,
-) = grid.findMinPaths(start, end, "#", Direction.RIGHT) { _, currentDst, fromDir, toDir ->
+) = grid.findMinPaths(start, end, "#", Direction.RIGHT) { currentDst, _, _, fromDir, toDir ->
     currentDst + 1 + (if (fromDir == toDir) 0 else 1000)
 }
 
 private fun part1(input: String): Int {
     val (grid, start, end) = parse(input)
-    val (v, _) = findMinPaths(grid, start, end)
-    return v
+    val paths = findMinPaths(grid, start, end)
+    return paths.first().dst
 }
 
 private fun part2(input: String): Int {
     val (grid, start, end) = parse(input)
-    val (_, paths) = findMinPaths(grid, start, end)
+    val paths = findMinPaths(grid, start, end)
 
     val sum =
         paths
+            .map { path -> path.path.map { it.p } }
             .flatten()
             .toSet()
             .size

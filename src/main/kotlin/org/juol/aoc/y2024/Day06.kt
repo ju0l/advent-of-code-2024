@@ -8,6 +8,7 @@ private fun Direction.nextDirection(): Direction =
         Direction.RIGHT -> Direction.DOWN
         Direction.DOWN -> Direction.LEFT
         Direction.LEFT -> Direction.UP
+        Direction.NONE -> Direction.NONE
     }
 
 private fun getVisited(grid: Grid<String>): List<Point>? {
