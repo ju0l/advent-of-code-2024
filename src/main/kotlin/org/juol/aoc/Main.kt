@@ -12,9 +12,11 @@ fun main() {
         """.trimIndent()
 
     val testAnswer1 = 0
-    check(part1(testInput) == testAnswer1) { "answer 1 to test is wrong" }
+    val testResult1 = part1(testInput)
+    check(testResult1 == testAnswer1) { "Answer 1 to test is wrong: $testAnswer1" }
     val testAnswer2 = 0
-    check(part2(testInput) == testAnswer2) { "answer 2 to test is wrong" }
+    val testResult2 = part2(testInput)
+    check(testResult2 == testAnswer2) { "Answer 2 to test is wrong: $testAnswer2" }
 
     val input = readInput("Day01")
     part1(input).println()
