@@ -75,20 +75,6 @@ private fun buildKeypadPaths(keypad: Grid<String>): Map<Pair<String, String>, Li
     return moves
 }
 
-private fun combinations(
-    paths: List<List<String>>,
-    current: List<String> = listOf(),
-    index: Int = 0,
-): List<List<String>> {
-    if (index == paths.size) return listOf(current)
-    val results = mutableListOf<List<String>>()
-    for (value in paths[index]) {
-        val newResults = combinations(paths, current + value, index + 1)
-        results.addAll(newResults)
-    }
-    return results
-}
-
 private val cache = ConcurrentHashMap<Pair<String, Int>, Long>()
 
 private fun getMoves(
@@ -102,7 +88,7 @@ private fun getMoves(
             "A$sequence".zipWithNext { a, b ->
                 if (a != b) keypadPaths[(a.toString() to b.toString())]!! else listOf("A")
             }
-        val paths = combinations(moves)
+        val paths = combineLists(moves)
         cache[cacheKey] =
             if (depth == 0) {
                 paths.minOf { it.sumOf { move -> move.length.toLong() } }

@@ -18,28 +18,6 @@ private fun parse(input: String): Graph<String, DefaultEdge> =
             }
     }
 
-private fun combinations(
-    int: List<String>,
-    length: Int,
-): List<List<String>> {
-    val combinations = mutableListOf<List<String>>()
-
-    fun generateCombinations(
-        start: Int,
-        current: List<String>,
-    ) {
-        if (current.size == length) {
-            combinations += current
-            return
-        }
-        for (i in start until int.size) {
-            generateCombinations(i + 1, current + int[i])
-        }
-    }
-    generateCombinations(0, emptyList())
-    return combinations
-}
-
 private fun part1(input: String): Int {
     val graph = parse(input)
     val cliques =

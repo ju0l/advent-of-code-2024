@@ -2,15 +2,6 @@ package org.juol.aoc.y2024
 
 import org.juol.aoc.utils.*
 
-private fun Direction.nextDirection(): Direction =
-    when (this) {
-        Direction.UP -> Direction.RIGHT
-        Direction.RIGHT -> Direction.DOWN
-        Direction.DOWN -> Direction.LEFT
-        Direction.LEFT -> Direction.UP
-        Direction.NONE -> Direction.NONE
-    }
-
 private fun getVisited(grid: Grid<String>): List<Point>? {
     val visited = mutableListOf<Pair<Direction, Point>>()
 
@@ -35,7 +26,7 @@ private fun getVisited(grid: Grid<String>): List<Point>? {
 
             when (newChar) {
                 null -> return false
-                "#" -> dir = dir.nextDirection()
+                "#" -> dir = dir.nextClockwise()
                 else -> pos = np
             }
         }
